@@ -22,7 +22,8 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
+      // fix it later
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -37,6 +38,13 @@
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.yourcompany.appname",
+          "enableGooglePay": true
         }
       ]
     ],
