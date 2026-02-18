@@ -1,70 +1,67 @@
-import { useStripe } from "@stripe/stripe-react-native";
-import React, { useEffect, useState } from "react";
-import { Alert, Button } from "react-native";
+import { Link } from "expo-router";
+import React from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function CheckoutScreen() {
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const [loading, setLoading] = useState(false);
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
-  const fetchPaymentSheetParams = async () => {
-    const response = await fetch("http://192.168.0.111:5001/api/stripe/payment-sheet", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const { paymentIntent, ephemeralKey, customer } = await response.json();
-
-    return {
-      paymentIntent,
-      ephemeralKey,
-      customer,
-    };
-  };
-
-  const initializePaymentSheet = async () => {
-    const { paymentIntent, ephemeralKey, customer } =
-      await fetchPaymentSheetParams();
-
-    const { error } = await initPaymentSheet({
-      merchantDisplayName: "Example, Inc.",
-      customerId: customer,
-      customerEphemeralKeySecret: ephemeralKey,
-      paymentIntentClientSecret: paymentIntent,
-      // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
-      //methods that complete payment after a delay, like SEPA Debit and Sofort.
-      allowsDelayedPaymentMethods: true,
-      defaultBillingDetails: {
-        name: "Jane Doe",
-      },
-      returnURL: "expostripe://stripe-redirect",
-    });
-    if (!error) {
-      setLoading(true);
-    }
-  };
-
-  const openPaymentSheet = async () => {
-    const { error } = await presentPaymentSheet();
-
-    if (error) {
-      console.log(error);
-      Alert.alert(`Error code: ${error.code}`, error.message);
-    } else {
-      Alert.alert("Success", "Your order is confirmed!");
-    }
-  };
-
-  useEffect(() => {
-    initializePaymentSheet();
-  }, []);
+export default function HomeScreen() {
+  const colorScheme = useColorScheme();
+  const tintColor = Colors[colorScheme ?? 'light'].tint;
 
   return (
     <SafeAreaView
-      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}
     >
-      <Button disabled={!loading} title="Checkout" onPress={openPaymentSheet} />
+      <ThemedView style={styles.container}>
+        <ThemedText type="title" style={styles.title}>
+          Головна сторінка
+        </ThemedText>
+        
+        <ThemedView style={styles.linksContainer}>
+          <Link href="/login" asChild>
+            <TouchableOpacity style={[styles.button, { backgroundColor: tintColor }]}>
+              <ThemedText style={styles.buttonText}>Увійти</ThemedText>
+            </TouchableOpacity>
+          </Link>
+
+          <Link href="/register" asChild>
+            <TouchableOpacity style={[styles.button, { backgroundColor: tintColor }]}>
+              <ThemedText style={styles.buttonText}>Зареєструватися</ThemedText>
+            </TouchableOpacity>
+          </Link>
+        </ThemedView>
+      </ThemedView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  title: {
+    marginBottom: 40,
+    textAlign: 'center',
+  },
+  linksContainer: {
+    width: '100%',
+    gap: 16,
+  },
+  button: {
+    height: 52,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
